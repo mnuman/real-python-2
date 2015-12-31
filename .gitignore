@@ -1,0 +1,9 @@
+# Additional stuff to ignore globally for this repo
+test.db
+env
+venv
+*.pyc
+__pychache__
+*.DS_Store
+.coverage
+htmlcov

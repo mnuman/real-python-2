@@ -36,10 +36,11 @@ def login_required(test):
 
 # route handlers
 @app.route('/logout/')
+@login_required
 def logout():
     session.pop('logged_in', None)
     session.pop('user_id', None)
-    flash('Goodbye')
+    flash('Goodbye!')
     return(redirect(url_for('login')))
 
 
@@ -56,9 +57,7 @@ def login():
                 flash('Welcome!')
                 return redirect(url_for('tasks'))
             else:
-                error = 'Invalid credentials'
-        else:
-            error = 'Both fields are required'
+                error = 'Invalid username or password.'
     return render_template('login.html', form=form, error=error)
 
 
@@ -126,7 +125,7 @@ def delete_entry(task_id):
     new_id = task_id
     db.session.query(Task).filter_by(task_id=new_id).delete()
     db.session.commit()
-    flash('Task was successfully deleted.')
+    flash('The task was deleted.')
     return redirect(url_for('tasks'))
 
 
@@ -143,7 +142,7 @@ def register():
             try:
                 db.session.add(new_user)
                 db.session.commit()
-                flash('Thanks for registering, Please login.')
+                flash('Thanks for registering. Please login.')
                 return redirect(url_for('login'))
             except IntegrityError:
                 error = 'That username and/or email already exist.'

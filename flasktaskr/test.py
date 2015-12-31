@@ -85,7 +85,7 @@ class AllTests(unittest.TestCase):
 
     def test_users_cannot_login_unless_registered(self):
         response = self.login('foo', 'bar')
-        self.assertIn(b'Invalid credentials', response.data)
+        self.assertIn(b'Invalid username or password.', response.data)
 
     def test_users_can_login(self):
         self.register('Michael', 'michael@realpython.com', 'python', 'python')
@@ -95,7 +95,7 @@ class AllTests(unittest.TestCase):
     def test_invalid_form_data(self):
         self.register('Michael', 'michael@realpython.com', 'python', 'python')
         response = self.login('alert("alert box!");', 'foo')
-        self.assertIn(b'Invalid credentials', response.data)
+        self.assertIn(b'Invalid username or password.', response.data)
 
     def test_form_is_present_on_register_page(self):
         response = self.app.get('register/')
@@ -106,7 +106,7 @@ class AllTests(unittest.TestCase):
         self.app.get('register/', follow_redirects=True)
         response = self.register(
             'Michael', 'michael@realpython.com', 'python', 'python')
-        self.assertIn(b'Thanks for registering, Please login.', response.data)
+        self.assertIn(b'Thanks for registering. Please login.', response.data)
 
     def test_user_registration_error(self):
         self.app.get('register/', follow_redirects=True)
@@ -124,12 +124,11 @@ class AllTests(unittest.TestCase):
         self.register('Fletcher', 'fletcher@realpython.com', 'python101', 'python101')
         self.login('Fletcher', 'python101')
         response = self.logout()
-        self.assertIn(b'Goodbye', response.data)
+        self.assertIn(b'Goodbye!', response.data)
 
     def test_not_logged_in_users_cannot_logout(self):
         response = self.logout()
-        self.assertNotIn(b'Yadayadayada',
-                         response.data)
+        self.assertNotIn(b'Goodbye!', response.data)
 
     def test_logged_in_users_can_access_tasks_page(self):
         self.register(
@@ -172,7 +171,7 @@ class AllTests(unittest.TestCase):
         self.app.get('tasks/', follow_redirects=True)
         self.create_task()
         response = self.app.get("complete/1/", follow_redirects=True)
-        self.assertIn(b'Task is complete. Nice.', response.data)
+        self.assertIn(b'The task is complete. Nice.', response.data)
 
     def test_users_can_delete_tasks(self):
         self.create_user('Michael', 'michael@realpython.com', 'python')
@@ -180,7 +179,7 @@ class AllTests(unittest.TestCase):
         self.app.get('tasks/', follow_redirects=True)
         self.create_task()
         response = self.app.get("delete/1/", follow_redirects=True)
-        self.assertIn(b'Task was successfully deleted.', response.data)
+        self.assertIn(b'The task was deleted.', response.data)
 
     def test_users_cannot_complete_tasks_that_are_not_created_by_them(self):
         self.create_user('Michael', 'michael@realpython.com', 'python')
