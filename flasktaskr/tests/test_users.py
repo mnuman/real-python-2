@@ -1,12 +1,12 @@
-# project/test.py
+# project/test_users.py
 
 
 import os
 import unittest
 
-from views import app, db
-from _config import basedir
-from models import User
+from project import app, db
+from project._config import basedir
+from project.models import User
 
 TEST_DB = 'test.db'
 
@@ -65,10 +65,6 @@ class UsersTests(unittest.TestCase):
         ), follow_redirects=True)
 
 
-    ###############
-    #### tests ####
-    ###############
-
     def test_users_can_register(self):
         new_user = User("michael", "michael@mherman.org", "michaelherman")
         db.session.add(new_user)
@@ -102,13 +98,13 @@ class UsersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Please register to access the task list.', response.data)
 
-    def test_user_registration(self):
+    def test_user_registeration(self):
         self.app.get('register/', follow_redirects=True)
         response = self.register(
             'Michael', 'michael@realpython.com', 'python', 'python')
         self.assertIn(b'Thanks for registering. Please login.', response.data)
 
-    def test_user_registration_error(self):
+    def test_user_registeration_error(self):
         self.app.get('register/', follow_redirects=True)
         self.register('Michael', 'michael@realpython.com', 'python', 'python')
         self.app.get('register/', follow_redirects=True)
@@ -130,25 +126,54 @@ class UsersTests(unittest.TestCase):
         response = self.logout()
         self.assertNotIn(b'Goodbye!', response.data)
 
-    def test_logged_in_users_can_access_tasks_page(self):
-        self.register(
-            'Fletcher', 'fletcher@realpython.com', 'python101', 'python101'
+    def test_duplicate_user_registeration_throws_error(self):
+        self.register('Fletcher', 'fletcher@realpython.com', 'python101', 'python101')
+        response = self.register('Fletcher', 'fletcher@realpython.com', 'python101', 'python101')
+        self.assertIn(
+            b'That username and/or email already exist.',
+            response.data
         )
-        self.login('Fletcher', 'python101')
-        response = self.app.get('tasks/')
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b'Add a new task:', response.data)
 
-    def test_not_logged_in_users_cannot_access_tasks_page(self):
-        response = self.app.get('tasks/', follow_redirects=True)
-        self.assertIn(b'You need to login first.', response.data)
+    def test_user_login_field_errors(self):
+        response = self.app.post(
+            '/',
+            data=dict(
+                name='',
+                password='python101',
+            ),
+            follow_redirects=True
+        )
+        self.assertIn(b'This field is required.', response.data)
 
-    def test_default_user_role(self):
-        db.session.add(User( "Johnny", "john@doe.com", "johnny"))
+    def test_string_reprsentation_of_the_user_object(self):
+
+        db.session.add(
+            User(
+                "Johnny",
+                "john@doe.com",
+                "johnny"
+            )
+        )
+
         db.session.commit()
 
         users = db.session.query(User).all()
-        print users
+        for user in users:
+            self.assertEqual(user.name, 'Johnny')
+
+    def test_default_user_role(self):
+
+        db.session.add(
+            User(
+                "Johnny",
+                "john@doe.com",
+                "johnny"
+            )
+        )
+
+        db.session.commit()
+
+        users = db.session.query(User).all()
         for user in users:
             self.assertEqual(user.role, 'user')
 
