@@ -4,7 +4,7 @@
 import os
 import unittest
 
-from project import app, db
+from project import app, db, bcrypt
 from project._config import basedir
 from project.models import User
 
@@ -52,13 +52,13 @@ class UsersTests(unittest.TestCase):
 
     def create_admin_user(self):
         new_user = User(name='Superman', email='superman@krypton.com',
-                        password='allpowerful', role='admin')
+                        password=bcrypt.generate_password_hash('allpowerful'), role='admin')
         db.session.add(new_user)
         db.session.commit()
 
 
     def create_user(self, name, email, password):
-        new_user = User(name=name, email=email, password=password)
+        new_user = User(name=name, email=email, password=bcrypt.generate_password_hash(password))
         db.session.add(new_user)
         db.session.commit()
 
@@ -105,7 +105,7 @@ class UsersTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Please register to access the task list.', response.data)
 
-    def test_user_registeration(self):
+    def test_user_registration(self):
         self.app.get('register/', follow_redirects=True)
         response = self.register(
             'Michael', 'michael@realpython.com', 'python', 'python')
