@@ -32,6 +32,10 @@
               <li><a href="/logout">Signout</a></li>
             {% endif %}
           </ul>
+          {% if session.logged_in %}
+          <ul class="nav navbar-nav navbar-right">
+            <li><a>Welcome, {{username}}.</a></li>
+          {% endif %}
         </div><!--/.nav-collapse -->
       </div>
     </div>
